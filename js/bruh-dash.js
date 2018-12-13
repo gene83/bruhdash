@@ -109,15 +109,9 @@ global.bruhdash = {
 
   // removes elements of an array corresponding to the given indices
   pullAt: function (arr, indexes) {
-    /*  for (let i = 0; i < arr.length; i++) {
-        if (indexes.includes(i)) {
-          arr.splice(i, 1)
-        }
-      }
-      return arr;
-      above doesn't work because its based on indexes and they change with every splice, 
-      I want to use splice to mutate the original array though
-      */
+    let pulled = arr.filter(val => indexes.includes(arr.indexOf(val)));
+    arr = arr.filter(val => !indexes.includes(arr.indexOf(val)));
+    return pulled;
   },
 
   // creates an array excluding all the specified values

@@ -20,69 +20,120 @@ global.bruhdash = {
 
   // returns the index of the first matching element from left to right
   indexOf: function(arr, value) {
-    return arr.indexOf(value);
+    for (let i = 0; i < arr.length; i++) {
+      if (arr[i] === value) {
+        return i;
+      }
+    }
+    return -1;
   },
 
   // returns the index of the first matching element from right to left
   lastIndexOf: function(arr, value) {
-    return arr.lastIndexOf(value);
+    let index = -1;
+    for (let i = 0; i < arr.length; i++) {
+      if (arr[i] === value) {
+        index = i;
+      }
+    }
+    return index;
   },
 
   // returns an array with all elements except for the last element
   initial: function(arr) {
-    return arr.slice(0, arr.length - 1);
+    let newArr = [];
+    for (let i = 0; i < arr.length - 1; i++) {
+      newArr[i] = arr[i];
+    }
+    return newArr;
   },
 
   // returns an array with all falsey values removed
   compact: function(arr) {
-    return arr.filter(value => !!value);
+    let newArr = [];
+    for (let i = 0; i < arr.length; i++) {
+      if (!!arr[i]) {
+        newArr.push(arr[i]);
+      }
+    }
+    return newArr;
   },
 
   // creates a slice of an array from the start index up to but not including the end index
   slice: function(arr, index1, index2) {
-    return arr.slice(index1, index2);
+    let newArr = [];
+    for (let i = index1; i < index2; i++) {
+      newArr.push(arr[i]);
+    }
+    return newArr;
   },
 
   // returns a slice of array with n elements dropped from the beignning
   drop: function(arr, n) {
+    let newArr = [];
     if (n === undefined) {
-      return arr.slice(1);
+      for (let i = 1; i < arr.length; i++) {
+        newArr.push(arr[i]);
+      }
     } else {
-      return arr.slice(n);
+      for (let i = n; i < arr.length; i++) {
+        newArr.push(arr[i]);
+      }
     }
+    return newArr;
   },
 
   // returns a slice of array with n elements dropped from the end
   dropRight: function(arr, n) {
+    let newArr = [];
     if (n === undefined) {
-      return arr.slice(0, arr.length - 1);
+      for (let i = 0; i < arr.length - 1; i++) {
+        newArr.push(arr[i]);
+      }
     } else {
-      return arr.slice(0, arr.length - n);
+      for (let i = 0; i < arr.length - n; i++) {
+        newArr.push(arr[i]);
+      }
     }
+    return newArr;
   },
 
   // creates a slice of an array with n elements taken from the beginning
   take: function(arr, n) {
+    let newArr = [];
     if (n === undefined) {
-      return arr.slice(0, 1);
+      for (let i = 0; i < 1; i++) {
+        newArr.push(arr[i]);
+      }
+    } else if (n > arr.length) {
+      return arr;
     } else {
-      return arr.slice(0, n);
+      for (let i = 0; i < n; i++) {
+        newArr.push(arr[i]);
+      }
     }
+    return newArr;
   },
 
   // creates a slice of an array with n elements taken from the end
   takeRight: function(arr, n) {
+    let newArr = [];
     if (n === undefined) {
-      return arr.slice(arr.length - 1, arr.length);
+      return [arr[arr.length - 1]];
+    } else if (n > arr.length) {
+      return arr;
     } else {
-      return arr.slice(arr.length - n, arr.length);
+      for (let i = arr.length - n; i < arr.length; i++) {
+        newArr.push(arr[i]);
+      }
     }
+    return newArr;
   },
 
   // fills elements of array with specified value from the start index
   // up to but not including the end index
   fill: function(arr, val, start, end) {
-    if (start === undefined && end === undefined) {
+    if (start === undefined || end === undefined) {
       for (let i = 0; i < arr.length; i++) {
         arr[i] = val;
       }
@@ -95,31 +146,45 @@ global.bruhdash = {
   },
 
   // removes all given values from an array
-  pull: function(arr, value1, value2) {
-    for (let i = 0; i < arr.length; i++) {
-      if (arr[i] === value1 || arr[i] === value2) {
-        arr.splice(i, 1);
-        i--;
-      }
+  pull: function(arr, ...values) {
+    for (let i = 0; i < values.length; i++) {
+      arr.splice(arr.indexOf[values[i]], 1);
     }
     return arr;
   },
 
   // removes elements of an array corresponding to the given indices
   pullAt: function(arr, indexes) {
-    let pulled = arr.filter(val => indexes.includes(arr.indexOf(val)));
-    arr = arr.filter(val => !indexes.includes(arr.indexOf(val)));
+    let pulled = [];
+    indexes.sort((a, b) => b - a);
+    for (let i = 0; i < indexes.length; i++) {
+      pulled[i] = arr[indexes[i]];
+      arr.splice(indexes[i], 1);
+    }
+    pulled.reverse();
     return pulled;
   },
 
   // creates an array excluding all the specified values
-  without: function(arr, value1, value2) {
-    return arr.filter(value => ![value1, value2].includes(value));
+  without: function(arr, ...values) {
+    let newArr = [];
+    for (let i = 0; i < arr.length; i++) {
+      if (!values.includes(arr[i])) {
+        newArr.push(arr[i]);
+      }
+    }
+    return newArr;
   },
 
   // returns an array with specified values excluded
   difference: function(arr, values) {
-    return arr.filter(val => !values.includes(val));
+    let newArr = [];
+    for (let i = 0; i < arr.length; i++) {
+      if (!values.includes(arr[i])) {
+        newArr.push(arr[i]);
+      }
+    }
+    return newArr;
   },
 
   /*******************
@@ -162,11 +227,13 @@ global.bruhdash = {
   // iterates over elements of a collection and invokes iteratee for each element
   // Note: this should work for arrays and objects
   forEach: function(collection, iteratee) {
-    if (typeof collection === "array") {
-      for (let i = 0; i < collection.length; i++) {
-        iteratee(collection[i]);
-      }
-    } else if (typeof collection === "object") {
+    // typeof doesn't return array, instead treats arrays as objects?
+    // if (typeof collection === "array") {
+    //   for (let i = 0; i < collection.length; i++) {
+    //     iteratee(collection[i]);
+    //   }
+    // } else
+    if (typeof collection === "object") {
       for (key in collection) {
         iteratee(collection[key]);
       }
@@ -177,11 +244,13 @@ global.bruhdash = {
   // Note: this should work for arrays and objects
   map: function(collection, iteratee) {
     let newArr = [];
-    if (typeof collection === "array") {
-      for (let i = 0; i < collection.length; i++) {
-        newArr[i] = iteratee(collection[i]);
-      }
-    } else if (typeof collection === "object") {
+    // typeof doesn't return array, instead treats arrays as objects?
+    // if (typeof collection === "array") {
+    //   for (let i = 0; i < collection.length; i++) {
+    //     newArr[i] = iteratee(collection[i]);
+    //   }
+    // } else
+    if (typeof collection === "object") {
       for (key in collection) {
         newArr.push(iteratee(collection[key]));
       }
@@ -197,13 +266,15 @@ global.bruhdash = {
   // Note: this should work for arrays and objects
   filter: function(collection, iteratee) {
     let newArr = [];
-    if (typeof collection === "array") {
-      for (let i = 0; i < collection.length; i++) {
-        if (iteratee(collection)) {
-          newArr[i] = collection[i];
-        }
-      }
-    } else if (typeof collection === "object") {
+    // typeof doesn't return array, instead treats arrays as objects?
+    // if (typeof collection === "array") {
+    //   for (let i = 0; i < collection.length; i++) {
+    //     if (iteratee(collection)) {
+    //       newArr[i] = collection[i];
+    //     }
+    //   }
+    // } else
+    if (typeof collection === "object") {
       for (let key in collection) {
         if (iteratee(collection[key])) {
           newArr.push(collection[key]);
@@ -220,11 +291,13 @@ global.bruhdash = {
     if (accumulator === undefined) {
       accumulator = 0;
     }
-    if (typeof collection === "array") {
-      for (let i = 0; i < collection.length; i++) {
-        accumulator = iteratee(accumulator, collection[i]);
-      }
-    } else if (typeof collection === "object") {
+    // typeof doesn't return array, instead treats arrays as objects?
+    // if (typeof collection === "array") {
+    //   for (let i = 0; i < collection.length; i++) {
+    //     accumulator = iteratee(accumulator, collection[i]);
+    //   }
+    // } else
+    if (typeof collection === "object") {
       for (let key in collection) {
         accumulator = iteratee(accumulator, collection[key]);
       }
